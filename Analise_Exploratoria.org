@@ -1,0 +1,139 @@
+<<a6d9c8aa-462c-4d19-98cb-45e4faa030cb>>
+* Insper - Programa Avancado em Data Science e Tomada de Decisao
+:PROPERTIES:
+:CUSTOM_ID: insper---programa-avancado-em-data-science-e-tomada-de-decisao
+:END:
+Atividade Integradora - Terceiro Trimestre 24T1
+
+#+begin_example
+import pandas as pd
+#+end_example
+
+#+begin_example
+country = pd.read_csv("Base de Dados - PADS/Country.csv")
+league = pd.read_csv("Base de Dados - PADS/League.csv")
+match_df = pd.read_csv("Base de Dados - PADS/Match.csv")
+player = pd.read_csv("Base de Dados - PADS/Player.csv")
+player_attributes = pd.read_csv("Base de Dados - PADS/Player_Attributes.csv")
+team = pd.read_csv("Base de Dados - PADS/Team.csv")
+team_attributes = pd.read_csv("Base de Dados - PADS/Team_Attributes.csv")
+sqlite_sequence = pd.read_csv("Base de Dados - PADS/sqlite_sequence.csv")
+#+end_example
+
+#+begin_example
+assert ((country.columns == ['id', 'name']).all())
+
+assert (len(country) == 11)
+
+
+assert ((league.columns == ['id', 'country_id', 'name']).all())
+
+assert (len(league) == 11)
+
+
+assert ((player.columns == ['id',
+                            'player_api_id',
+                            'player_name',
+                            'player_fifa_api_id',
+                            'birthday',
+                            'height',
+                            'weight']).all())
+
+assert(len(player) == 11060)
+
+
+assert ((team.columns == ['id',
+                          'team_api_id',
+                          'team_fifa_api_id',
+                          'team_long_name',
+                          'team_short_name']).all())
+
+assert (len(team) == 299)
+
+
+assert ((sqlite_sequence.columns == ['name', 'seq']).all())
+
+assert (len(sqlite_sequence) == 7)
+
+
+assert ((all(col in match_df for col in ['id',
+                                         'country_id',
+                                         'league_id',
+                                         'date',
+                                         'match_api_id',
+                                         'home_team_api_id',
+                                         'away_team_api_id'])))
+
+assert (len(match_df) == 25979)
+
+
+assert ((all(col in player_attributes for col in ['id',
+                                                  'player_fifa_api_id',
+                                                  'player_api_id',
+                                                  'date'])))
+
+assert (len(player_attributes) == 183978)
+#+end_example
+
+#+begin_example
+def show_missing(df):
+    """Return a Pandas dataframe describing the contents of a source dataframe including missing values."""
+    
+    variables = []
+    dtypes = []
+    count = []
+    unique = []
+    missing = []
+    pc_missing = []
+    
+    for item in df.columns:
+        variables.append(item)
+        dtypes.append(df[item].dtype)
+        count.append(len(df[item]))
+        unique.append(len(df[item].unique()))
+        missing.append(df[item].isna().sum())
+        pc_missing.append(round((df[item].isna().sum() / len(df[item])) * 100, 2))
+
+    output = pd.DataFrame({
+        'variable': variables, 
+        'dtype': dtypes,
+        'count': count,
+        'unique': unique,
+        'missing': missing, 
+        'pc_missing': pc_missing
+    })    
+        
+    return output
+#+end_example
+
+#+begin_example
+for data in [country,
+             league,
+             match_df,
+             player,
+             player_attributes,
+             team,
+             team_attributes,
+             sqlite_sequence]:
+    missing_data = show_missing(data)\
+        .sort_values('pc_missing', ascending=False, ignore_index = True)
+
+    index_full_data = list(missing_data[missing_data['missing']==0].index)
+
+    missing_data.drop(labels=index_full_data, axis='index', inplace=True)
+
+    missing_val_columns = missing_data['variable'][missing_data['pc_missing']>0]
+
+    msno.bar(data[missing_val_columns], figsize=(16, 4))
+#+end_example
+
+#+begin_example
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+Cell In[61], line 18
+     14 missing_data.drop(labels=index_full_data, axis='index', inplace=True)
+     16 missing_val_columns = missing_data['variable'][missing_data['pc_missing']>0]
+---> 18 msno.bar(data[missing_val_columns], figsize=(16, 4))
+
+NameError: name 'msno' is not defined
+#+end_example
